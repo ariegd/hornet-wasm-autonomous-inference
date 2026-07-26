@@ -1,0 +1,72 @@
+name: Factoría de Parches en Caliente (Edge Wasm CI/CD)
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch: # Permite ejecución manual ante "emergencias simuladas"
+
+env:
+  PROJECT_ID: tu-proyecto-gcp-id            # CAMBIA POR TU ID DE GOOGLE CLOUD
+  GAR_LOCATION: europe-west1                # Región de GCP (ej. Bélgica/España)
+  REPOSITORY: simulador-defensa-repo        # Nombre de tu Artifact Registry
+  IMAGE_NAME: hornet-edge-ai                # Nombre de nuestro artefacto de IA
+
+jobs:
+  build-and-push-wasm:
+    name: Compilar Binario Wasm y Empaquetar OCI
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: 'read'
+      id-token: 'write' # Requerido para autenticación segura en GCP
+
+    steps:
+    - name: Checkout del Código
+      uses: actions/checkout@v4
+
+    - name: Instalar Rust Toolchain (Destino Wasm)
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: wasm32-wasi
+
+    - name: Compilar Algoritmo de Inferencia a Wasm
+      run: |
+        # Simulamos que compilamos el software optimizado del dron
+        # Esto generará un binario .wasm ultra-ligero en target/wasm32-wasi/release/
+        cargo build --target wasm32-wasi --release
+
+    - name: Configurar Herramientas OCI (Buildah / Skopeo)
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y buildah
+
+    - name: Autenticación en Google Cloud (Workload Identity)
+      uses: google-github-actions/auth@v2
+      with:
+        # Nota: Configura previamente Workload Identity Federation en GCP para evitar usar contraseñas fijas
+        workload_identity_provider: 'projects/NUMERO_PROYECTO/locations/global/workloadIdentityPools/mi-pool/providers/mi-proveedor'
+        service_account: 'mi-cuenta-servicio@${{ env.PROJECT_ID }}.iam.gserviceaccount.com'
+
+    - name: Configurar Docker / Credenciales de GCP
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Autenticar en Google Artifact Registry
+      run: |
+        gcloud auth configure-docker ${{ env:GAR_LOCATION }}-docker.pkg.dev --quiet
+
+    - name: Empaquetar Wasm en Contenedor OCI Ultra-Ligero
+      run: |
+        # Diseñamos un contenedor "Scratch" sin Sistema Operativo, solo el binario Wasm.
+        # Esto reduce el tamaño a escasos Megabytes, ideal para transmitir vía satélite o red mesh.
+        CONTAINER=$(buildah from scratch)
+        buildah copy $CONTAINER target/wasm32-wasi/release/*.wasm /handler.wasm
+        buildah config --entrypoint '["/handler.wasm"]' $CONTAINER
+        buildah config --annotation "module.wasm.image/variant=compat-smart" $CONTAINER
+        buildah commit $CONTAINER ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+    - name: Desplegar Parche a Artifact Registry (Cloud Central)
+      run: |
+        buildah push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        # Añadimos la etiqueta 'latest' para simular la actualización del frente de batalla
+        buildah tag ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
+        buildah push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:latest
