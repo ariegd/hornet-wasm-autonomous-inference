@@ -1,6 +1,19 @@
 # hornet-wasm-autonomous-inference
 Simulación académica de una arquitectura Edge-Fog-Cloud para entornos denegados basada en WebAssembly y K3s. Inspirado en modelos operativos de Edge AI modernos.
 
+## En el flujo continuo completo:
+```
+[Operario Mando Central] 
+        ↓ (Consulta en Lenguaje Natural)
+[Vertex AI / Gemini (Capa Cloud)] 
+        ↓ (Genera Payload JSON de Reconfiguración)
+[GitHub Actions CI/CD (Factoría de Parches)] 
+        ↓ (Compila nuevo módulo .wasm en Scratch)
+[Google Artifact Registry]
+        ↓ (Push vía Satélite/Mesh)
+[Nodo Fog (Vehículo / Estación Terrena)] → [Dron Hornet (Edge Wasm)]
+```
+
 ## Cláusula de Exención de Responsabilidad (Disclaimer)
 **AVISO IMPORTANTE Y EXCLUSIÓN DE RESPONSABILIDAD:** Este proyecto ha sido desarrollado exclusivamente con fines académicos, educativos y de investigación para la Facultad de Informática de la Universidad Complutense de Madrid (UCM). 
 
