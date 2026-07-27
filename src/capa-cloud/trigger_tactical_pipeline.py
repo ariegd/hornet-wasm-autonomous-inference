@@ -5,9 +5,9 @@ from google import genai
 from google.genai import types
 
 # === CONFIGURACIÓN ===
-GITHUB_REPO = os.environ.get("GITHUB_REPOSITORY", "ariegd/hornet-wasm-autonomous-inference")
+GITHUB_REPO = "ariegd/hornet-wasm-autonomous-inference"
 WORKFLOW_FILE = "deploy-edge-wasm.yml"
-GITHUB_BRANCH = "main"
+GITHUB_BRANCH = "master"
 
 def generate_tactical_json():
     """Consulta a Vertex AI y extrae el JSON táctico determinista."""
