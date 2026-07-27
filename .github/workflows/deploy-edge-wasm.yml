@@ -1,15 +1,15 @@
-name: Factoría de Parches en Caliente (Edge Wasm CI/CD)
+name: Factoría de Parches en Caliente (Edge Wasm CI/CD) 4
 
 on:
   push:
-    branches: [ "main" ]
-  workflow_dispatch: # Permite ejecución manual ante emergencias simuladas
+    branches: [ "main", "master" ]  # Soportamos ambas ramas
+  workflow_dispatch:
 
 env:
-  PROJECT_ID: ia-models-vm-hub              # ID de tu proyecto GCP
-  GAR_LOCATION: europe-west1                # Región de Artifact Registry
-  REPOSITORY: simulador-defensa-repo        # Nombre de tu Artifact Registry
-  IMAGE_NAME: hornet-edge-ai                # Nombre del artefacto de IA
+  PROJECT_ID: ia-models-vm-hub
+  GAR_LOCATION: europe-west1
+  REPOSITORY: simulador-defensa-repo
+  IMAGE_NAME: hornet-edge-ai
 
 jobs:
   build-and-push-wasm:
@@ -18,7 +18,7 @@ jobs:
 
     permissions:
       contents: 'read'
-      id-token: 'write' # Requerido para autenticación OIDC/Workload Identity
+      id-token: 'write'
 
     steps:
     - name: Checkout del Código
@@ -27,11 +27,11 @@ jobs:
     - name: Instalar Rust Toolchain (Destino Wasm)
       uses: dtolnay/rust-toolchain@stable
       with:
-        targets: wasm32-wasip1  # Corregido a WASI Preview 1
+        targets: wasm32-wasip1
 
     - name: Compilar Algoritmo de Inferencia a Wasm
       run: |
-        cargo build --target wasm32-wasip1 --release  # Corregido el target de compilación
+        cargo build --target wasm32-wasip1 --release
 
     - name: Configurar Herramientas OCI (Buildah)
       run: |
@@ -54,7 +54,7 @@ jobs:
     - name: Empaquetar Wasm en Contenedor OCI Ultra-Ligero
       run: |
         CONTAINER=$(buildah from scratch)
-        buildah copy $CONTAINER target/wasm32-wasip1/release/*.wasm /handler.wasm  #  Corregida la ruta del binario
+        buildah copy $CONTAINER target/wasm32-wasip1/release/*.wasm /handler.wasm
         buildah config --entrypoint '["/handler.wasm"]' $CONTAINER
         buildah config --annotation "module.wasm.image/variant=compat-smart" $CONTAINER
         buildah commit $CONTAINER ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
