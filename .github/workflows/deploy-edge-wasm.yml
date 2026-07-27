@@ -1,15 +1,15 @@
-name: Factoría de Parches en Caliente (Edge Wasm CI/CD)
+name: Factoría de Parches en Caliente (Edge Wasm CI/CD) 2
 
 on:
   push:
     branches: [ "main" ]
-  workflow_dispatch: # Permite ejecución manual ante "emergencias simuladas"
+  workflow_dispatch: # Permite ejecución manual ante emergencias simuladas
 
 env:
-  PROJECT_ID: ia-models-vm-hub              # ID exacto de tu proyecto GCP
+  PROJECT_ID: ia-models-vm-hub              # ID de tu proyecto GCP
   GAR_LOCATION: europe-west1                # Región de Artifact Registry
   REPOSITORY: simulador-defensa-repo        # Nombre de tu Artifact Registry
-  IMAGE_NAME: hornet-edge-ai                # Nombre del artefacto Wasm
+  IMAGE_NAME: hornet-edge-ai                # Nombre del artefacto de IA
 
 jobs:
   build-and-push-wasm:
@@ -18,7 +18,7 @@ jobs:
 
     permissions:
       contents: 'read'
-      id-token: 'write' # Requerido para autenticación mediante Workload Identity Federation
+      id-token: 'write' # Requerido para autenticación OIDC/Workload Identity
 
     steps:
     - name: Checkout del Código
@@ -41,8 +41,7 @@ jobs:
     - name: Autenticación en Google Cloud (Workload Identity)
       uses: google-github-actions/auth@v2
       with:
-        # Reemplaza 'NUMERO_DE_PROYECTO' por el número de tu proyecto (obtenido con: gcloud projects describe ia-models-vm-hub --format="value(projectNumber)")
-        workload_identity_provider: 'projects/NUMERO_DE_PROYECTO/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
+        workload_identity_provider: 'projects/861671760827/locations/global/workloadIdentityPools/github-pool/providers/github-provider'
         service_account: 'mi-cuenta-servicio@ia-models-vm-hub.iam.gserviceaccount.com'
 
     - name: Configurar Docker / Credenciales de GCP
