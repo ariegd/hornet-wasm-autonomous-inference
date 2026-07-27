@@ -197,3 +197,12 @@ export GITHUB_TOKEN="ghp_tuTokenGeneradoEnGitHubAqui"
 # 2. Ejecutar la integración Cloud -> GitHub Actions
 python3 src/capa-cloud/trigger_tactical_pipeline.py
 ```
+4. Salida 
+```
+(base) zodd@nootbster:~/Documentos/@Documentos/Doctorado2026/projects/hornet-wasm-autonomous-inference$ python3 src/capa-cloud/trigger_tactical_pipeline.py
+[1. CLOUD] Consultando Vertex AI (ia-models-vm-hub / europe-west1)...
+[2. GIT-FACTORY] Conectando con la API REST de GitHub...
+[ÉXITO] Pipeline de compilación y despliegue disparado en GitHub Actions.
+Payload inyectado en el artefacto:
+{"ignore_frequency_ghz": 2.4, "min_confidence_threshold": 0.90, "target_priority": ["Fuel_Tanker"]}
+```

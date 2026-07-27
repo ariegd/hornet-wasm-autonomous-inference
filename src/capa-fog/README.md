@@ -84,3 +84,42 @@ Pasa la telemetría JSON directamente a la entrada estándar (`stdin`) de `wasmt
  PROCESO FINALIZADO - ORDEN TRANSMITIDA A ACTUADORES DE VUELO
 ======================================================================
 ```
+
+# Probar la resiliencia del nodo Fog (Blindado) y del enjambre Edge (Drones)
+Para probar la resiliencia del nodo Fog (Blindado) y del enjambre Edge (Drones) ante una interrupción total de comunicaciones con la nube (escenario de Guerra Electrónica / EW Jamming), debemos validar tres propiedades fundamentales de la arquitectura:
+1. **Inmunidad del Demonio de Sincronización:** El script `fog_sync_node.py` debe manejar la pérdida de conectividad sin colapsar (graceful degradation).
+2. **Autonomía Operativa de K3s:** Los pods Wasm en ejecución deben permanecer intactos y funcionales en los drones sin importar que Google Artifact Registry no responda.
+3. **Resiliencia de Réplicas (Cache Local):** Si un pod se reinicia o cae en medio del apagón de red, K3s debe ser capaz de re-instanciarlo utilizando la imagen OCI almacenada en la caché local de crun/containerd.
+
+# Ejecutar el Protocolo de Prueba de Resiliencia
+1. Iniciar la Capa Fog y verificar el estado base
+```
+kubectl get pods -l app=hornet-edge-ai -o wide
+
+# Lanza el demonio de la Capa Fog
+python3 src/capa-fog/fog_sync_node.py
+```
+2. Simular el Bloqueo de Guerra Electrónica (Corte a GCP)
+```
+# Simular ataque EW / Inhibición de frecuencia satelital
+sudo sh -c 'echo "127.0.0.1 europe-west1-docker.pkg.dev" >> /etc/hosts'
+```
+
+# Observar la reacción del sistema
+1. En la consola de `fog_sync_node.py`:
+Verás cómo el script detecta el fallo de enlace sin dar un error de Python (`Traceback`), informando de la pérdida de comunicación con Cloud Central y manteniendo el enjambre operando en modo local desconectado.
+2. Verificar la estabilidad de los Drones (K3s):
+```
+kubectl get pods -l app=hornet-edge-ai
+```
+3. Probar la recuperación ante fallos de hardware en el Edge (Simular caída de un dron):
+```
+kubectl delete pod -l app=hornet-edge-ai --field-selector status.phase=Running --tail=1
+```
+
+# Restablecer la Conectividad (Fin de la Interferencia EW)
+Esto demuestra empíricamente la hipótesis principal de la arquitectura: el sistema desacopla la inteligencia de control (Cloud) de la ejecución táctica (Edge/Fog), garantizando la supervivencia del enjambre en entornos denegados.
+```
+# Eliminar la regla de inhibición de red
+sudo sed -i '/europe-west1-docker.pkg.dev/d' /etc/hosts
+```

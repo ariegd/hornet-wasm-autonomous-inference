@@ -1,0 +1,39 @@
+apiVersion: node.k8s.io/v1
+kind: RuntimeClass
+metadata:
+  name: crun
+handler: crun
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hornet-edge-patch-deployment
+  namespace: default
+  labels:
+    tier: fog-to-edge
+    system: hornet-drone
+spec:
+  replicas: 3 # Simulación del enjambre de 3 drones
+  selector:
+    matchLabels:
+      app: hornet-edge-ai
+  template:
+    metadata:
+      labels:
+        app: hornet-edge-ai
+      annotations:
+        # Anotación clave OCI para indicar ejecución Wasm
+        module.wasm.image/variant: compat-smart
+    spec:
+      runtimeClassName: crun
+      containers:
+      - name: hornet-edge-inference-engine
+        image: europe-west1-docker.pkg.dev/ia-models-vm-hub/simulador-defensa-repo/hornet-edge-ai:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: "16Mi"
+            cpu: "50m"
+          limits:
+            memory: "32Mi"
+            cpu: "100m"
