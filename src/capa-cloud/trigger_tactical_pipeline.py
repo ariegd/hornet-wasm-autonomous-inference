@@ -55,7 +55,7 @@ def trigger_github_workflow(payload_json, github_token):
     """Envía el JSON a la API de GitHub Actions para disparar el workflow_dispatch."""
     print("[2. GIT-FACTORY] Conectando con la API REST de GitHub...")
 
-    url = f"[https://api.github.com/repos/](https://api.github.com/repos/){GITHUB_REPO}/actions/workflows/{WORKFLOW_FILE}/dispatches"
+    url = f"https://api.github.com/repos/){GITHUB_REPO}/actions/workflows/{WORKFLOW_FILE}/dispatches"
 
     headers = {
         "Authorization": f"Bearer {github_token}",
