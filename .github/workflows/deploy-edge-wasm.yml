@@ -1,9 +1,14 @@
-name: Factoría de Parches en Caliente (Edge Wasm CI/CD) 4
+name: Factoría de Parches en Caliente (Edge Wasm CI/CD) 5
 
 on:
   push:
-    branches: [ "main", "master" ]  # Soportamos ambas ramas
+    branches: [ "main", "master" ]
   workflow_dispatch:
+    inputs:
+      tactical_config:
+        description: 'Parámetros tácticos JSON generados por Vertex AI'
+        required: false
+        default: '{"ignore_frequency_ghz": 2.4, "min_confidence_threshold": 0.85, "target_priority": ["BTR-80"]}'
 
 env:
   PROJECT_ID: ia-models-vm-hub
@@ -23,6 +28,21 @@ jobs:
     steps:
     - name: Checkout del Código
       uses: actions/checkout@v4
+
+    - name: Inyectar Configuración Táctica en Tiempo de Compilación
+      run: |
+        echo "[CI/CD] Inyectando parámetros tácticos..."
+        mkdir -p src/config
+        
+        # Lee el input del dispatch. Si fue un push normal, usa la configuración por defecto.
+        RAW_JSON='${{ github.event.inputs.tactical_config }}'
+        if [ -z "$RAW_JSON" ]; then
+          RAW_JSON='{"ignore_frequency_ghz": 2.4, "min_confidence_threshold": 0.85, "target_priority": ["BTR-80"]}'
+        fi
+        
+        echo "$RAW_JSON" > src/config/tactical_params.json
+        echo "Contenido de src/config/tactical_params.json:"
+        cat src/config/tactical_params.json
 
     - name: Instalar Rust Toolchain (Destino Wasm)
       uses: dtolnay/rust-toolchain@stable
