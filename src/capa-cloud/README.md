@@ -173,3 +173,27 @@ RESPUESTA DEL SISTEMA DE MANDO CENTRAL (DELTA / VERTEX AI):
 ======================================================================
 
 ```
+
+# DevOps Táctico Dirigido por Intenciones (Intent-Driven GitOps)
+1. Crear el Script Integrador: `src/capa-cloud/trigger_tactical_pipeline.py`
+Este script es la pieza central que materializa el concepto de DevOps Táctico Dirigido por Intenciones (Intent-Driven GitOps): transforma una orden en lenguaje natural en un artefacto compilado binario en la nube en cuestión de segundos, sin intervención humana manual en la base de código.
+2. Obtención del Token de GitHub (PAT)
+Para que el script tenga permisos de disparar el pipeline en tu repositorio ariegd/hornet-wasm-autonomous-inference:
+```
+1. En GitHub, ve a Settings → Developer Settings → Personal Access Tokens → Tokens (classic) (o Fine-grained tokens).
+
+2. Haz clic en Generate new token.
+
+3. Asigna un nombre (ej. script-tactico-cloud) y marca el scope:
+    repo (o al menos workflows para disparar acciones).
+
+4. Copia el token generado.
+```
+3. Ejecución de Prueba Integrada
+```
+# 1. Exportar el token de GitHub
+export GITHUB_TOKEN="ghp_tuTokenGeneradoEnGitHubAqui"
+
+# 2. Ejecutar la integración Cloud -> GitHub Actions
+python3 src/capa-cloud/trigger_tactical_pipeline.py
+```
