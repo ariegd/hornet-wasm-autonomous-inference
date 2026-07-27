@@ -61,7 +61,37 @@ gcloud artifacts repositories create simulador-defensa-repo \
 gcloud artifacts repositories list --location=europe-west1
 ```
 
-
+# Paso imprescindible en GCP para la autenticación sin claves fijas
+Como estamos utilizando Workload Identity Federation en la acción `google-github-actions/auth@v2` (la práctica recomendada por Google para evitar guardar claves JSON privadas en GitHub Secrets), debemos ejecutar estos 4 comandos en nuestra terminal local para vincular GitHub con el Service Account:
+1. Obtener el número numérico de tu proyecto GCP
+```
+PROJECT_NUMBER=$(gcloud projects describe ia-models-vm-hub --format="value(projectNumber)")
+```
+2. Crear el Workload Identity Pool
+```
+gcloud iam workload-identity-pools create "github-pool" \
+  --project="ia-models-vm-hub" \
+  --location="global" \
+  --display-name="GitHub Actions Pool"
+```
+3. Crear el Proveedor dentro del Pool autorizando a tu repositorio de GitHub
+```
+# (Sustituye 'tu-usuario-o-org/tu-repositorio' por el nombre real en GitHub)
+gcloud iam workload-identity-pools providers create-oidc "github-provider" \
+  --project="ia-models-vm-hub" \
+  --location="global" \
+  --workload-identity-pool="github-pool" \
+  --display-name="GitHub Provider" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.actor=assertion.actor,attribute.repository=assertion.repository" \
+  --issuer-uri="https://token.actions.githubusercontent.com"
+```
+4. Conceder permiso a tu repositorio de GitHub para asumir la Service Account
+```
+gcloud iam service-accounts add-iam-policy-binding "mi-cuenta-servicio@ia-models-vm-hub.iam.gserviceaccount.com" \
+  --project="ia-models-vm-hub" \
+  --role="roles/iam.workloadIdentityUser" \
+  --member="principalSet://iam.googleapis.com/projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/github-pool/attribute.repository/tu-usuario-o-org/tu-repositorio"
+```
 
 
 
