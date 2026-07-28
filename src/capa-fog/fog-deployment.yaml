@@ -13,7 +13,7 @@ metadata:
     tier: fog-to-edge
     system: hornet-drone
 spec:
-  replicas: 3 # Simulación del enjambre de 3 drones
+  replicas: 3
   selector:
     matchLabels:
       app: hornet-edge-ai
@@ -22,10 +22,11 @@ spec:
       labels:
         app: hornet-edge-ai
       annotations:
-        # Anotación clave OCI para indicar ejecución Wasm
         module.wasm.image/variant: compat-smart
     spec:
       runtimeClassName: crun
+      imagePullSecrets:             # <--- ESTAS DOS LÍNEAS PERMITEN ACCEDER A GAR
+        - name: gcp-registry-key
       containers:
       - name: hornet-edge-inference-engine
         image: europe-west1-docker.pkg.dev/ia-models-vm-hub/simulador-defensa-repo/hornet-edge-ai:latest
