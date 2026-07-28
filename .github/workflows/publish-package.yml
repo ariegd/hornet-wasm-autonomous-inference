@@ -1,0 +1,33 @@
+name: Publish OCI Package to GHCR
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch: # Permite ejecutarlo manualmente desde la pestaña Actions con un clic
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write # CLAVE - Permiso explícito de escritura en GitHub Packages
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker/Wasm Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:v1.0.0
