@@ -54,11 +54,22 @@ cargo build --target wasm32-wasip1 --release
 2. Ejecución de la simulación local de Guerra Electrónica (EW)
 ```
 # Iniciar el nodo Fog táctico en segundo plano
-python3 src/capa-fog/fog_sync_node.py &
+python3 src/capa-fog/fog_sync_node.py
 
 # Iniciar la simulación del enjambre Edge
 python3 src/capa-edge/simulador_enjambre.py
+
+# Iniciar el disparador en el nodo Cloud
+python3 src/capa-cloud/trigger_tactical_pipeline.py
 ```
+
+---
+
+##  Demostración en Vídeo
+
+Haz clic en la imagen a continuación para ver la simulación completa de la arquitectura y la prueba de resiliencia a Guerra Electrónica (EW):
+
+[![Demostración Simulación Edge-Fog-Cloud Wasm](https://youtu.be/UEbs_qBAtEA)](https://youtu.be/UEbs_qBAtEA)
 
 ---
 
