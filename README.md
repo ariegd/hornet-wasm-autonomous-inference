@@ -40,10 +40,10 @@ Simulación académica de una arquitectura **Edge-Fog-Cloud** resiliente frente 
 - [Flujo Continuo Operativo](#flujo-continuo-operativo)
 - [Puesta en Marcha (Entorno Táctico Completo)](#puesta-en-marcha-entorno-táctico-completo)
   - [Paso 0: Prerrequisitos y Compilación del Artefacto Wasm](#paso-0-prerrequisitos-y-compilación-del-artefacto-wasm)
-  - [Terminal 1: Capa Cloud (Generador de Parches / Trigger)](#terminal-1-capa-cloud-generador-de-parches--trigger)
-  - [Terminal 2: Capa Fog (Nodo Blindado Táctico)](#terminal-2-capa-fog-nodo-blindado-táctico)
-  - [Terminal 3: Capa Edge (Simulador de Enjambre Wasm)](#terminal-3-capa-edge-simulador-de-enjambre-wasm)
- - [Prueba Opcional: Simulación de Guerra Electrónica (EW Jamming)](#prueba-opcional-simulación-de-guerra-electrónica-ew-jamming)
+  - [Terminal 1: Capa Fog (Nodo Blindado Táctico)](#terminal-1-capa-fog-nodo-blindado-táctico)
+  - [Terminal 2: Capa Edge (Simulador de Enjambre Wasm)](#terminal-2-capa-edge-simulador-de-enjambre-wasm)
+  - [Terminal 3: Capa Cloud (Trigger / Factoría de Parches)](#terminal-3-capa-cloud-trigger-factoría-de-parches)
+- [Prueba Opcional: Simulación de Guerra Electrónica (EW Jamming)](#prueba-opcional-simulación-de-guerra-electrónica-ew-jamming)
 - [Demostración en Vídeo](#demostración-en-vídeo)
 - [Cláusula de Exención de Responsabilidad (Disclaimer)](#cláusula-de-exención-de-responsabilidad-disclaimer)
 
@@ -95,10 +95,17 @@ Sigue este orden secuencial abriendo **3 terminales independientes** para observ
 Antes de lanzar las capas, compila el motor de inferencia en Rust para generar el binario ultra-ligero:
 
 ```bash
-# 1. Asegurar el target WASI en el compilador de Rust
+# 1. Cargar las variables de entorno de Rust en la sesión actual (si ya está instalado)
+source "$HOME/.cargo/env"
+
+# 2. Si Rust no está instalado en el sistema, ejecuta el instalador oficial y carga el PATH:
+# curl --proto '=https' --tlsv1.2 -sSf [https://sh.rustup.rs](https://sh.rustup.rs) | sh
+# source "$HOME/.cargo/env"
+
+# 3. Asegurar el target WASI en el compilador de Rust
 rustup target add wasm32-wasip1
 
-# 2. Compilar el binario optimizado para el enjambre
+# 4. Compilar el binario optimizado para el enjambre
 cargo build --target wasm32-wasip1 --release
 ```
 
